@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+if [ ! -d ~/.pnvim ]
+then
+    echo "First run, please wait while setting up:"
+    oldhome="REPLACEME"
+    newhome="$HOME/.pnvim"
+    mkdir ~/.pnvim
+    PAYLOAD_LINE=$(awk '/^__PAYLOAD_BEGINS__/ { print NR + 1; exit 0; }' $0)
+    tail -n +${PAYLOAD_LINE} $0 | base64 -d | tar -zpx -C ~/.pnvim
+    find ~/.pnvim/.local/share/nvim/mason -type f -exec sed -i "s|$oldhome|$newhome|g" {} +
+    XDG_CONFIG_HOME=~/.pnvim/.config XDG_DATA_HOME=~/.pnvim/.local/share XDG_STATE_HOME=~/.pnvim/.local/state XDG_CACHE_HOME=~/.pnvim/.cache ~/.pnvim/dist/bin/nvim "$@"
+else
+    XDG_CONFIG_HOME=~/.pnvim/.config XDG_DATA_HOME=~/.pnvim/.local/share XDG_STATE_HOME=~/.pnvim/.local/state XDG_CACHE_HOME=~/.pnvim/.cache ~/.pnvim/dist/bin/nvim "$@"
+fi
+
+exit 0
+__PAYLOAD_BEGINS__
